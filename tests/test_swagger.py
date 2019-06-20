@@ -3114,6 +3114,21 @@ class SwaggerTest(object):
         assert 'description' not in path['get']
         assert path['get']['security'] == [{'oauth2': ['read', 'write']}]
 
+    def test_multiple_routes_deprecation(self, api, client):
+        @api.route('/foo/bar', doc={'deprecated': True})
+        @api.route('/bar')
+        class TestResource(restplus.Resource):
+            def get(self):
+                pass
+
+        data = client.get_specs()
+
+        path = data['paths']['/foo/bar']
+        assert path['get']['deprecated'] is True
+
+        path = data['paths']['/bar']
+        assert 'deprecated' not in path['get']
+
 
 class SwaggerDeprecatedTest(object):
     def test_doc_parser_parameters(self, api):
